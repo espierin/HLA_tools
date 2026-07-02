@@ -1,0 +1,8 @@
+*.exe
+dist/
+build/
+*.spec
+donor_browser_profile*/
+hml_files/
+ET*_HML_output_*/
+ET*_HML_failed_*/
