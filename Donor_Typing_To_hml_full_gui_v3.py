@@ -901,6 +901,79 @@ def get_browser_profile_dir(started_from: Path) -> Path:
     return profile_dir
 
 
+def get_browser_cache_dir(started_from: Path) -> Path:
+    cache_dir = started_from / "donor_browser_cache_temp"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    return cache_dir
+
+
+def cleanup_browser_profile_cache(profile_dir: Path) -> tuple[int, int]:
+    """Remove cache/component folders without deleting cookies or local storage."""
+    profile_dir = profile_dir.resolve()
+    disposable_relative_paths = [
+        "ActorSafetyLists",
+        "AutofillStates",
+        "BrowserMetrics",
+        "CertificateRevocation",
+        "component_crx_cache",
+        "Crashpad",
+        "Crowd Deny",
+        "FileTypePolicies",
+        "FirstPartySetsPreloaded",
+        "GrShaderCache",
+        "GraphiteDawnCache",
+        "hyphen-data",
+        "MEIPreload",
+        "optimization_guide_model_store",
+        "OptimizationHints",
+        "PKIMetadata",
+        "Safe Browsing",
+        "SafetyTips",
+        "segmentation_platform",
+        "ShaderCache",
+        "SODA",
+        "SODALanguagePacks",
+        "SSLErrorAssistant",
+        "Subresource Filter",
+        "TrustTokenKeyCommitments",
+        "WasmTtsEngine",
+        "WidevineCdm",
+        "ZxcvbnData",
+        "BrowserMetrics-spare.pma",
+        "Default/Cache",
+        "Default/Code Cache",
+        "Default/DawnCache",
+        "Default/GPUCache",
+        "Default/GrShaderCache",
+        "Default/GraphiteDawnCache",
+        "Default/Service Worker/CacheStorage",
+        "Default/Service Worker/ScriptCache",
+    ]
+    removed_count = 0
+    freed_bytes = 0
+    for relative_path in disposable_relative_paths:
+        target = (profile_dir / relative_path).resolve()
+        try:
+            if not (target == profile_dir or profile_dir in target.parents):
+                continue
+            if not target.exists():
+                continue
+            if target.is_dir():
+                freed_bytes += sum(
+                    item.stat().st_size
+                    for item in target.rglob("*")
+                    if item.is_file()
+                )
+                shutil.rmtree(target, ignore_errors=True)
+            else:
+                freed_bytes += target.stat().st_size
+                target.unlink(missing_ok=True)
+            removed_count += 1
+        except Exception:
+            continue
+    return removed_count, freed_bytes
+
+
 def read_saved_devtools_port(profile_dir: Path) -> int | None:
     port_file = profile_dir / "devtools_port.txt"
     try:
@@ -957,6 +1030,7 @@ def launch_controlled_browser(
     donor_url: str, donor_et_number: str, started_from: Path
 ) -> tuple[subprocess.Popen | None, int]:
     profile_dir = get_browser_profile_dir(started_from)
+    cleanup_browser_profile_cache(profile_dir)
     saved_port = read_saved_devtools_port(profile_dir) or discover_existing_devtools_port(profile_dir)
     if saved_port is not None:
         save_devtools_port(profile_dir, saved_port)
@@ -964,12 +1038,33 @@ def launch_controlled_browser(
         return None, saved_port
 
     browser = find_browser_executable()
+    cache_dir = get_browser_cache_dir(started_from)
+    shutil.rmtree(cache_dir, ignore_errors=True)
+    cache_dir.mkdir(parents=True, exist_ok=True)
     port = get_free_local_port()
     process = subprocess.Popen(
         [
             str(browser),
             f"--remote-debugging-port={port}",
             f"--user-data-dir={profile_dir}",
+            f"--disk-cache-dir={cache_dir}",
+            "--disk-cache-size=1048576",
+            "--media-cache-size=1048576",
+            "--aggressive-cache-discard",
+            "--disable-application-cache",
+            "--disable-background-networking",
+            "--disable-component-update",
+            "--disable-crash-reporter",
+            "--disable-default-apps",
+            "--disable-domain-reliability",
+            "--disable-features=AutofillServerCommunication,CertificateTransparencyComponentUpdater,MediaRouter,OptimizationHints,OnDeviceSpeechRecognition",
+            "--disable-gpu-shader-disk-cache",
+            "--disable-logging",
+            "--disable-notifications",
+            "--disable-sync",
+            "--metrics-recording-only",
+            "--no-default-browser-check",
+            "--no-first-run",
             "--new-window",
             donor_url,
         ],
@@ -2803,6 +2898,7 @@ def gui_main() -> int:
 
         def get_existing_browser_port(self) -> int | None:
             profile_dir = get_browser_profile_dir(Path(self.output_folder_edit.text()).expanduser())
+            cleanup_browser_profile_cache(profile_dir)
             port = read_saved_devtools_port(profile_dir) or discover_existing_devtools_port(profile_dir)
             if port is not None:
                 save_devtools_port(profile_dir, port)
@@ -3320,6 +3416,7 @@ def gui_main() -> int:
         def check_login_state(self) -> None:
             try:
                 profile_dir = get_browser_profile_dir(Path(self.output_folder_edit.text()).expanduser())
+                cleanup_browser_profile_cache(profile_dir)
                 port = read_saved_devtools_port(profile_dir) or discover_existing_devtools_port(profile_dir)
                 self.browser_port = port
                 logged_in = False
@@ -3365,8 +3462,14 @@ def gui_main() -> int:
         def logout_from_donordata(self) -> None:
             self.logged_in = False
             self.logged_in_username = ""
+            profile_dir = get_browser_profile_dir(Path(self.output_folder_edit.text()).expanduser())
+            removed_count, freed_bytes = cleanup_browser_profile_cache(profile_dir)
             self.update_login_controls()
-            self.log("Logout is handled in the external browser; local status reset.")
+            freed_mb = freed_bytes / (1024 * 1024)
+            self.log(
+                "Logout is handled in the external browser; local status reset. "
+                f"Cleaned {removed_count} browser cache item(s), about {freed_mb:.1f} MB."
+            )
 
         def choose_hml_files_folder(self, label: QLabel | None = None) -> None:
             folder = QFileDialog.getExistingDirectory(self, "Choose HML output folder", str(self.hml_files_dir))
