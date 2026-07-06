@@ -15,7 +15,6 @@ All ET numbers shown in screenshots and examples are synthetic and anonymized.
 Donor Typing to HML reads HLA typing data from the Eurotransplant Donordata donor page and generates:
 
 - original GL string;
-- original HML 1.0.1 file;
 - donor-specific audit folder;
 - general `hml_files` folder containing all generated HML files;
 - optional imputed GL string;
