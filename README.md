@@ -1,259 +1,144 @@
 # Donor Typing to HML
 
-Donor Typing to HML converts Eurotransplant Donordata HLA typing information into HML 1.0.1 files.
+Convert Eurotransplant Donordata HLA typing into HML 1.0.1 files.
 
-The current main version is a Windows-focused Python GUI application that:
+Current documented version: **2.0**  
+Author: Eric Spierings, UMC Utrecht  
+Copyright: (C) 2026
 
-- Opens Donordata login in Microsoft Edge or Google Chrome.
-- Uses the normal Donordata login and two-factor authentication workflow.
-- Reads donor HLA typing data from the authenticated browser session.
-- Selects the best usable CIWD genotype typing block when multiple typings are present.
-- Builds a GL string with ambiguity information retained.
-- Writes a minimal HML 1.0.1 file.
-- Copies each generated HML into a shared `hml_files` folder.
+All ET numbers shown in screenshots and examples are synthetic and anonymized. 
 
-## Important Privacy Notice
+![Donor Typing to HML v2.0 main window](docs_v2_assets/v2_main_window.png)
 
-This tool processes donor data and HLA typing information. Use it only in an approved clinical, laboratory, or research environment.
+## What the application does
 
-Do not commit real donor output files, screenshots, browser profiles, logs, or diagnostic folders to GitHub.
+Donor Typing to HML reads HLA typing data from the Eurotransplant Donordata donor page and generates:
 
-Recommended `.gitignore` entries:
+- original GL string;
+- original HML 1.0.1 file;
+- donor-specific audit folder;
+- general `hml_files` folder containing all generated HML files;
+- optional imputed GL string;
+- optional imputed HML file with imputation metadata.
 
-```gitignore
-hml_files/
-ET*_HML_output_*/
-ET*_HML_failed_*/
-donor_browser_profile*/
-*.hml
-*.csv
-raw_donor_page_text.txt
-normalised_donor_page_text.txt
-```
+Version 2.0 adds an HLA imputation workspace using allele and haplotype frequency data.
 
-## Repository Contents
+## Main features
 
-Core application:
+- External-browser Donordata authentication with normal login and 2FA.
+- No OCR dependency for the v2.0 webpage workflow.
+- Queue-based donor processing.
+- Manual ET input, Enter-to-add, and CSV import.
+- Per-donor output folders and central `hml_files` folder.
+- HLA-A, B, C, DRB1, DRB3/4/5, DQA1, DQB1, DPA1, and DPB1 support.
+- Living-donor comma-only CIWD parsing safeguards.
+- Imputation across all available workbook ethnicities.
+- Genotype/haplotype toggle for imputed GL strings.
+- Soft country/registration-center prior with guardrails.
+- Imputed HML metadata for auditability.
 
-- `Donor_Typing_To_hml_full_gui_v3.py`  
-  Main Python GUI script.
+## Screenshots
 
-- `Donor_Typing_To_hml_full_gui_v3.exe`  
-  Windows single-file executable build.
+### Main window
 
-- `Donor_Typing_To_hml_icon.ico` / `Donor_Typing_To_hml_icon.png`  
-  Application icon assets.
+![Main window](docs_v2_assets/v2_main_window.png)
 
-Documentation:
+### Imputation workspace
 
-- `INSTALL_Windows_Donor_Typing_To_HML.md`
-- `INSTALL_macOS_Donor_Typing_To_HML.md`
-- `INSTALL_Ubuntu_Donor_Typing_To_HML.md`
-- `Donor_Typing_To_HML_Windows_Executable_User_Manual.docx`
+![Imputation workspace](docs_v2_assets/v2_imputation_panel.png)
 
-## Features
+### Settings
 
-### Donordata Session Handling
+![Settings](docs_v2_assets/v2_settings.png)
 
-The application does not ask for or store your Donordata password. Authentication happens in Edge or Chrome using the regular Donordata login and two-factor authentication process.
+### Output files
 
-After login, keep the browser window open. The application reads donor records through that authenticated browser session.
+![Output files](docs_v2_assets/v2_output_files.png)
 
-### Batch Conversion
+## Quick start for Windows executable
 
-You can add donor ET numbers manually or import a CSV file.
-
-CSV import expects ET numbers in the first column:
-
-```csv
-999135
-999131
-999125
-```
-
-Additional columns are ignored.
-
-### CIWD Genotype Selection
-
-If a donor has multiple HLA Typing entries, the application attempts to choose the most useful typing block:
-
-1. It requires usable CIWD genotype allele rows.
-2. If multiple entries are usable, it prefers the GL string with fewer `/` ambiguity separators.
-3. It favors typings with more two-field allele results, for example `A*02:01` rather than `A*02`.
-
-### Output
-
-For each donor conversion, the application creates:
-
-- A donor-specific output folder.
-- A final `.hml` file.
-- A copy of the `.hml` file in the configured `hml_files` folder.
-- Diagnostic text/CSV files for troubleshooting.
-
-Typical output files include:
-
-- `raw_donor_page_text.txt`
-- `normalised_donor_page_text.txt`
-- `*_metadata.csv`
-- `*_hla_row_candidates.csv`
-- `*_selected_hla_rows.csv`
-- `*_parsed_hla_typing.csv`
-- `*_gl_string.txt`
-- `*_donor_typing.hml`
-
-## Quick Start: Windows Executable
-
-1. Download or copy `Donor_Typing_To_hml_full_gui_v3.exe`.
-2. Place it in a folder where the user has write access.
+1. Download `Donor_Typing_To_hml_v2_0.exe` from the GitHub Release.
+2. Place it in a folder such as `C:\DonorTyping`.
 3. Double-click the executable.
-4. Open `Settings`.
-5. Click `Login`.
-6. Complete Donordata login and 2FA in Edge or Chrome.
-7. Keep the browser window open.
-8. Add ET donor numbers manually or import a CSV file.
-9. Click `Run selected` or `Run all`.
-10. Retrieve HML files from the configured HML folder.
+4. Choose an output folder.
+5. Open Settings and log in to Donordata.
+6. Add donor ET numbers.
+7. Run selected donors or run all checked donors.
+8. Collect HML files from `hml_files`.
 
-For detailed instructions, see:
+## Python source start
 
-- `Donor_Typing_To_HML_Windows_Executable_User_Manual.docx`
-
-## Running From Python
-
-### Requirements
-
-- Python 3.10 or newer.
-- Microsoft Edge or Google Chrome.
-- Donordata access with two-factor authentication.
-- Python package: `PySide6`.
-
-### Windows
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install PySide6
-python .\Donor_Typing_To_hml_full_gui_v3.py
-```
-
-### macOS
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install PySide6
-python Donor_Typing_To_hml_full_gui_v3.py
-```
-
-### Ubuntu
-
-```bash
-sudo apt update
-sudo apt install -y python3 python3-venv python3-pip libgl1 libegl1 libxcb-cursor0
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install PySide6
-python Donor_Typing_To_hml_full_gui_v3.py
-```
-
-For fuller platform-specific setup instructions, see:
-
-- `INSTALL_Windows_Donor_Typing_To_HML.md`
-- `INSTALL_macOS_Donor_Typing_To_HML.md`
-- `INSTALL_Ubuntu_Donor_Typing_To_HML.md`
-
-## Building a Windows Executable
-
-Install PyInstaller in the same virtual environment:
-
-```powershell
-python -m pip install pyinstaller
-```
-
-Build:
-
-```powershell
-python -m PyInstaller --clean --onefile --windowed --name Donor_Typing_To_hml_full_gui_v3 --icon Donor_Typing_To_hml_icon.ico Donor_Typing_To_hml_full_gui_v3.py
-```
-
-The executable will be created in:
+Keep these files in the same folder:
 
 ```text
-dist\Donor_Typing_To_hml_full_gui_v3.exe
+Donor_Typing_To_hml_full_gui_v2_0.py
+Donor_Typing_To_hml_full_gui_v3.py
+hla_frequency_tables.xlsx
+Donor_Typing_To_hml_icon.ico
 ```
 
-Note: PySide6 single-file executables are relatively large. This is expected.
-
-## Status Colors in the App
-
-| Status | Meaning |
-|---|---|
-| Waiting | Donor is queued. |
-| Loading donor page | Donor record is being accessed. |
-| Writing HML | Output files are being generated. |
-| Done | HML was successfully written. The row is bold and light green. |
-| Failed | Donor access, parsing, or HML generation failed. The row is italic and light red. |
-| Login needed | The Donordata session is not currently accessible. |
-
-## Troubleshooting
-
-### Login Is Not Detected
-
-Use `Settings` > `Login` from inside the app. Complete login and 2FA in the browser window opened by the app, and keep that window open.
-
-### Rows Fail After Login
-
-Possible causes:
-
-- Donordata session expired.
-- Browser window was closed.
-- Donor record is not accessible to the logged-in account.
-- HLA Typing / CIWD Genotype is missing or unreadable.
-- HML output could not be written.
-
-Try logging in again and rerunning the failed donors.
-
-### No HML File Appears
-
-Check:
-
-- The selected output folder.
-- The configured `hml_files` folder.
-- The Activity Log in the app.
-- Any `ET*_HML_failed_*` folder.
-
-### PySide6 Is Missing
-
-Install it in the active virtual environment:
+Install dependencies:
 
 ```bash
+python -m venv .venv
+python -m pip install --upgrade pip
 python -m pip install PySide6
 ```
 
-## Platform Notes
+Run:
 
-The current v3 version has been developed and tested primarily on Windows.
+```bash
+python Donor_Typing_To_hml_full_gui_v2_0.py
+```
 
-macOS and Ubuntu instructions are provided for Python setup, but browser-session detection may require small adaptations depending on local Chrome/Edge installation paths and browser security settings.
+On Windows PowerShell:
 
-## Security and Governance
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip PySide6
+.\.venv\Scripts\python.exe .\Donor_Typing_To_hml_full_gui_v2_0.py
+```
 
-This tool should be treated as a local operational tool for approved users.
+## Frequency table
 
-Recommended practices:
+Version 2.0 can load `hla_frequency_tables.xlsx` automatically when it is next to the script or executable. A different frequency workbook can be selected in Settings. The selected file is copied to `hla_frequency_tables.xlsx` for future launches.
 
-- Do not store output in public folders.
-- Do not commit generated donor files to Git.
-- Keep browser profile folders out of version control.
-- Use approved storage locations for HML and diagnostic files.
-- Confirm local institutional rules before sharing output files.
+## Imputation
 
-## License / Copyright
+The imputation workflow:
 
-Copyright (C) 2026 Eric Spierings, UMC Utrecht.
+1. Select a completed donor.
+2. Press **Impute**.
+3. Review the ethnicity comparison.
+4. Optionally choose another ethnicity and press **Select**.
+5. Toggle between genotype and haplotype display.
+6. Press **Create HML** to write an imputed HML file.
 
-No license has been assigned yet. Until a license is added, all rights are reserved by the copyright holder.
+The imputed HML includes metadata describing the imputation method, selected ethnicity, reliability, confidence, GL string mode, original GL string, and geographic prior status.
 
+## Security and privacy
+
+- The app does not store Donordata passwords or 2FA secrets.
+- Authentication is performed in the official Donordata website through an external browser.
+- Generated files may contain donor-related data and should be handled according to local policy.
+- Documentation screenshots use synthetic ET numbers only.
+
+## Documentation
+
+- [Windows installation guide](INSTALL_Windows_Donor_Typing_To_HML.md)
+- [macOS installation guide](INSTALL_macOS_Donor_Typing_To_HML.md)
+- [Ubuntu installation guide](INSTALL_Ubuntu_Donor_Typing_To_HML.md)
+- [Changelog 1.3 to 2.0](CHANGELOG_1_3_to_2_0.md)
+- Word user manual: `Donor_Typing_To_HML_v2_0_Windows_Executable_User_Manual.docx`
+
+## Limitations
+
+- Donordata authentication cannot be bypassed.
+- Imputation is probabilistic and requires expert review.
+- Registration center/country is used only as a soft prior.
+- Browser and Donordata frontend changes may require maintenance.
+
+## License / ownership
+
+Author: Eric Spierings, UMC Utrecht  
+Copyright: (C) 2026
