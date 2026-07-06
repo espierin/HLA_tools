@@ -6,7 +6,7 @@ Current documented version: **2.0**
 Author: Eric Spierings, UMC Utrecht  
 Copyright: (C) 2026
 
-All ET numbers shown in screenshots and examples are synthetic and anonymized. 
+All ET numbers shown in screenshots and examples are synthetic and anonymized.
 
 ![Donor Typing to HML v2.0 main window](docs_v2_assets/v2_main_window.png)
 
