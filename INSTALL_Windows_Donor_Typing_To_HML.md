@@ -1,269 +1,199 @@
-# Donor Typing to HML - Windows Installation Guide
+# Donor Typing to HML v2.0 - Windows Installation Guide
 
-This guide installs and runs the Python GUI version of `Donor_Typing_To_hml_full_gui_v3.py` on Windows.
+Version: 2.0  
+Last updated: 2026-07-06  
+Example ET numbers in this document are synthetic and anonymized, for example `734219`.
 
-## 1. What This Program Does
+![Main window](docs_v2_assets/v2_main_window.png)
 
-The program converts Eurotransplant Donordata HLA typing data into HML.
+## What this guide installs
 
-The normal workflow is:
+Donor Typing to HML v2.0 converts HLA typing from Eurotransplant Donordata into HML 1.0.1 files. Version 2.0 adds imputation using HLA allele and haplotype frequency tables, genotype/haplotype GL string display, imputed HML output, and a soft country/registration-center prior.
 
-1. Start the Donor Typing to HML app.
-2. Use `Settings` / `Login` to open Donordata in Edge or Chrome.
-3. Complete normal login and two-factor authentication.
-4. Enter or import one or more ET donor numbers.
-5. Run selected donors or all donors.
-6. The app reads the authenticated Donordata page in the background.
-7. HML files are written to the configured output folder and the `hml_files` folder.
+There are two Windows installation paths:
 
-## 2. Requirements
+1. **Recommended: use the single executable.** No Python installation is required.
+2. **Developer/source mode: run the Python script.** Use this if you want to inspect or modify the source.
 
-You need:
+## Recommended installation: single executable
+
+### Requirements
 
 - Windows 10 or Windows 11.
-- Python 3.10 or newer. Python 3.12 is recommended.
-- Microsoft Edge or Google Chrome.
-- Access to Donordata and working two-factor authentication.
-- The script file:
-  - `Donor_Typing_To_hml_full_gui_v3.py`
+- Microsoft Edge or Google Chrome installed.
+- Access to the Eurotransplant Donordata website.
+- Your normal Donordata login and two-factor authentication method.
+- Permission to write files in your chosen output folder.
 
-Python dependency:
+The executable contains:
 
-- `PySide6`
+- the v2.0 GUI;
+- the v3 browser/data extraction base script;
+- the bundled `hla_frequency_tables.xlsx` frequency workbook;
+- the application icon.
 
-No Tesseract/OCR is needed for this version.
+The executable does not contain a browser and does not bypass Donordata authentication. It uses your installed browser for the official login workflow.
 
-## 3. Install Python
+### Step 1 - Create an application folder
 
-1. Go to <https://www.python.org/downloads/windows/>.
-2. Download the latest Python 3 installer.
-3. Run the installer.
-4. Very important: tick `Add python.exe to PATH`.
-5. Click `Install Now`.
-
-After installation, open PowerShell and check:
+Create a folder such as:
 
 ```powershell
-python --version
+C:\DonorTyping
 ```
 
-You should see something like:
+Place the executable in that folder:
 
 ```text
-Python 3.12.x
+C:\DonorTyping\Donor_Typing_To_hml_v2_0.exe
 ```
 
-If `python` is not recognized, try:
+### Step 2 - Start the application
 
-```powershell
-py --version
-```
-
-## 4. Create a Program Folder
-
-Create a folder for the app, for example:
-
-```powershell
-mkdir C:\DonorTypingToHML
-```
-
-Copy `Donor_Typing_To_hml_full_gui_v3.py` into that folder.
-
-Then go to that folder:
-
-```powershell
-cd C:\DonorTypingToHML
-```
-
-## 5. Create a Virtual Environment
-
-A virtual environment keeps the app dependencies separate from other Python software.
-
-```powershell
-python -m venv .venv
-```
-
-If `python` does not work, use:
-
-```powershell
-py -m venv .venv
-```
-
-Activate it:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-If PowerShell blocks activation, run:
-
-```powershell
-Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-```
-
-Then activate again:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-When activation works, your prompt will start with:
+Double-click:
 
 ```text
-(.venv)
+Donor_Typing_To_hml_v2_0.exe
 ```
 
-## 6. Install Dependencies
+On first launch, Windows SmartScreen may warn that the application is from an unknown publisher. Choose **More info** and then **Run anyway** only if the file came from your trusted release source.
 
-Update `pip`:
+### Step 3 - Choose the output folder
 
-```powershell
-python -m pip install --upgrade pip
+Use the **Browse** button next to **Output folder**. The recommended layout is:
+
+```text
+C:\DonorTyping
 ```
 
-Install the GUI dependency:
+The program will create:
 
-```powershell
-python -m pip install PySide6
+```text
+C:\DonorTyping\hml_files
 ```
 
-Check that it installed:
+Every generated HML file is copied there. Donor-specific audit folders are also created in the selected output folder.
 
-```powershell
-python -c "import PySide6; print('PySide6 OK')"
-```
+### Step 4 - Log in to Donordata
 
-## 7. Run the Program
+Open **Settings** and press **Login**. Complete the normal Donordata login and two-factor authentication in the external browser.
 
-From the program folder:
+![Settings](docs_v2_assets/v2_settings.png)
 
-```powershell
-python .\Donor_Typing_To_hml_full_gui_v3.py
-```
+Important:
 
-The GUI should open.
+- Do not enter your password into this app.
+- The app does not store your password or 2FA secret.
+- If Donordata redirects to the login page, the app treats the session as not logged in.
+- If a donor report can be accessed, the app treats the session as active.
 
-## 8. First Use
+### Step 5 - Add donor ET numbers
 
-1. Click `Settings`.
-2. Click `Login`.
-3. Edge or Chrome opens.
-4. Complete Donordata login and 2FA.
-5. Return to the app.
-6. The app should detect that the session is active.
-7. Add ET numbers manually or import a CSV file.
-8. Click `Run selected` or `Run all`.
+You can add donors in three ways:
 
-## 9. CSV Import Format
+- Type one ET number, for example `734219`, and press **Enter**.
+- Type one ET number and press **Add**.
+- Press **Add ET** and select a CSV file with ET numbers in the first column, one donor per row.
 
-The CSV file should contain ET donor numbers in the first column.
-
-Example:
+Example CSV:
 
 ```csv
-999135
-999131
-999125
+734219
+682504
+591873
 ```
 
-Additional columns are ignored.
+### Step 6 - Run conversion
 
-## 10. Output Files
+Use the checkbox column in the donor queue to control which donors are included.
 
-The app writes:
+- **Run selected** processes only highlighted/selected queue rows.
+- **Run all** processes all checked rows.
+- **Stop** requests a stop after the current donor operation.
 
-- One donor-specific output folder per conversion.
-- A copy of the `.hml` file into the configured HML folder.
-- By default, this folder is named `hml_files`.
+Successful rows become bold with a light green background. Failed rows become italic with a light red background.
 
-Inside the GUI, use:
+### Step 7 - Review output
 
-- `Open HML`
-- `Open output folder`
-- `Open HML folder`
+The **Selected Donor** panel shows metadata, original GL string, and generated files. The **Output Files** panel lists created artifacts.
 
-## 11. Creating a Double-Click Launcher
+![Output files](docs_v2_assets/v2_output_files.png)
 
-Create a file named:
+## Source-mode installation on Windows
+
+Use source mode when you want to inspect, edit, or debug the Python scripts.
+
+### Files required
+
+Keep these files in the same folder:
 
 ```text
-Run_Donor_Typing_To_HML.cmd
+Donor_Typing_To_hml_full_gui_v2_0.py
+Donor_Typing_To_hml_full_gui_v3.py
+hla_frequency_tables.xlsx
+Donor_Typing_To_hml_icon.ico
 ```
 
-Place it in the same folder as the script.
+### Install Python
 
-Put this inside:
-
-```bat
-@echo off
-cd /d "%~dp0"
-call .venv\Scripts\activate.bat
-python Donor_Typing_To_hml_full_gui_v3.py
-pause
-```
-
-Double-click this `.cmd` file to start the app.
-
-## 12. Optional: Build a Windows EXE
-
-Install PyInstaller:
-
-```powershell
-python -m pip install pyinstaller
-```
-
-Build:
-
-```powershell
-python -m PyInstaller --clean --onefile --windowed --name Donor_Typing_To_hml_full_gui_v3 Donor_Typing_To_hml_full_gui_v3.py
-```
-
-The executable will appear in:
+Install Python 3.11 or 3.12 from:
 
 ```text
-dist\Donor_Typing_To_hml_full_gui_v3.exe
+https://www.python.org/downloads/windows/
 ```
 
-Note: a PySide6 one-file EXE is usually large. This is normal.
+During installation, tick **Add python.exe to PATH**.
 
-## 13. Troubleshooting
+### Create a virtual environment
 
-### `No module named PySide6`
-
-Activate the virtual environment and install PySide6:
+Open PowerShell in the project folder:
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
-python -m pip install PySide6
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install PySide6
 ```
 
-### Browser Does Not Open
+### Start the app from source
 
-Install or update Microsoft Edge or Google Chrome.
+```powershell
+.\.venv\Scripts\python.exe .\Donor_Typing_To_hml_full_gui_v2_0.py
+```
 
-The app looks for:
+## Updating the frequency workbook
 
-- Microsoft Edge
-- Google Chrome
+Open **Settings**, choose the Excel supplement, and confirm. The program copies the selected workbook to:
 
-### Login Is Not Detected
+```text
+hla_frequency_tables.xlsx
+```
 
-Try:
+next to the script or executable. On the next launch, this file is loaded automatically.
 
-1. Click `Settings`.
-2. Click `Login`.
-3. Log in again.
-4. Keep the browser window open.
-5. Return to the app and run again.
+## Troubleshooting
 
-### Records Turn Red
+### The app opens but no donor conversion happens
 
-Red rows mean conversion failed. Common reasons:
+- Check that you are logged in to Donordata.
+- Open Settings and press Login again.
+- Confirm that the browser shows the donor report and not the login page.
 
-- Donordata session expired.
-- The donor record could not be accessed.
-- The HLA Typing / CIWD genotype table could not be read.
-- No HML file was generated.
+### A row is marked failed
 
-Log in again and rerun the donor.
+Open the donor-specific output folder. It usually contains a failure report or raw text file. Common causes:
 
+- donor number not accessible for your account;
+- Donordata timeout;
+- typing table not loaded or not expanded;
+- no CIWD genotype present;
+- HML file could not be written to the selected output folder.
+
+### Frequency table does not load
+
+- Open Settings.
+- Select the Excel frequency workbook again.
+- Confirm that `hla_frequency_tables.xlsx` appears next to the executable or script.
+
+### Antivirus or SmartScreen warning
+
+This can happen with onefile PyInstaller executables. If the file came from your own build or trusted GitHub Release, allow it. If not, do not run it.

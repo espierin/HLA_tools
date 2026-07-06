@@ -1,250 +1,102 @@
-# Donor Typing to HML - macOS Installation Guide
+# Donor Typing to HML v2.0 - macOS Installation Guide
 
-This guide describes how to install and run the Python GUI version of `Donor_Typing_To_hml_full_gui_v3.py` on macOS.
+Version: 2.0  
+Last updated: 2026-07-06  
+Example ET numbers in this document are synthetic and anonymized, for example `734219`.
 
-Important: the current v3 script was primarily developed and tested on Windows. The GUI and parser are portable, but browser-session discovery and automated browser launching may need minor adjustment on macOS depending on your Chrome/Edge installation. The safest macOS route is to install Python/PySide6 first, test that the GUI opens, and then confirm browser login/session behavior.
+## macOS support status
 
-## 1. What This Program Does
+The Windows `.exe` does not run natively on macOS. On macOS, use the Python source version.
 
-The program converts Eurotransplant Donordata HLA typing data into HML.
+The app uses an external browser for Donordata login and page access. Donordata authentication, including two-factor authentication, must be completed manually in the browser.
 
-The intended workflow is:
+## Requirements
 
-1. Start the Donor Typing to HML app.
-2. Open Donordata login through the app.
-3. Complete normal login and two-factor authentication in Chrome or Edge.
-4. Enter or import ET donor numbers.
-5. Run conversions.
-6. Save HML files.
-
-## 2. Requirements
-
-You need:
-
-- macOS 12 or newer recommended.
-- Python 3.10 or newer. Python 3.12 is recommended.
-- Google Chrome or Microsoft Edge.
-- Access to Donordata and working two-factor authentication.
-- The script file:
-  - `Donor_Typing_To_hml_full_gui_v3.py`
-
-Python dependency:
-
-- `PySide6`
-
-No Tesseract/OCR is needed.
-
-## 3. Install Python
-
-### Option A: Install Python From python.org
-
-1. Go to <https://www.python.org/downloads/macos/>.
-2. Download the latest Python 3 macOS installer.
-3. Run the installer.
-
-Check in Terminal:
-
-```bash
-python3 --version
-```
-
-### Option B: Install Python With Homebrew
-
-If Homebrew is installed:
-
-```bash
-brew install python
-```
-
-Check:
-
-```bash
-python3 --version
-```
-
-## 4. Install Chrome or Edge
-
-Install one of:
-
-- Google Chrome: <https://www.google.com/chrome/>
-- Microsoft Edge: <https://www.microsoft.com/edge>
-
-Chrome is usually the easiest option on macOS.
-
-## 5. Create a Program Folder
-
-In Terminal:
-
-```bash
-mkdir -p "$HOME/DonorTypingToHML"
-```
-
-Copy `Donor_Typing_To_hml_full_gui_v3.py` into that folder.
-
-Then go there:
-
-```bash
-cd "$HOME/DonorTypingToHML"
-```
-
-## 6. Create a Virtual Environment
-
-```bash
-python3 -m venv .venv
-```
-
-Activate it:
-
-```bash
-source .venv/bin/activate
-```
-
-Your prompt should now start with:
+- macOS 13 or newer recommended.
+- Python 3.11 or 3.12.
+- Google Chrome, Microsoft Edge, or another Chromium-compatible browser.
+- Donordata access and 2FA.
+- The following files in one folder:
 
 ```text
-(.venv)
+Donor_Typing_To_hml_full_gui_v2_0.py
+Donor_Typing_To_hml_full_gui_v3.py
+hla_frequency_tables.xlsx
+Donor_Typing_To_hml_icon.ico
 ```
 
-## 7. Install Dependencies
+## Step 1 - Install Python
 
-Update `pip`:
+Recommended using Homebrew:
 
 ```bash
-python -m pip install --upgrade pip
+brew install python@3.12
 ```
 
-Install PySide6:
+Alternatively install Python from:
 
-```bash
-python -m pip install PySide6
+```text
+https://www.python.org/downloads/macos/
 ```
 
-Check:
-
-```bash
-python -c "import PySide6; print('PySide6 OK')"
-```
-
-## 8. Run the Program
-
-```bash
-python Donor_Typing_To_hml_full_gui_v3.py
-```
-
-The GUI should open.
-
-## 9. macOS Security Prompt
-
-If macOS blocks the app or Python from opening windows:
-
-1. Open `System Settings`.
-2. Go to `Privacy & Security`.
-3. Allow the blocked Python/app action.
-4. Run the script again.
-
-## 10. Browser Login Workflow
-
-1. In the app, open `Settings`.
-2. Click `Login`.
-3. Complete Donordata login and 2FA in Chrome or Edge.
-4. Keep the browser window open.
-5. Return to the app.
-6. Add ET numbers and run conversion.
-
-## 11. CSV Import Format
-
-The CSV file should contain ET donor numbers in the first column.
+## Step 2 - Create a project folder
 
 Example:
 
-```csv
-999135
-999131
-999125
+```bash
+mkdir -p ~/DonorTyping
+cd ~/DonorTyping
 ```
 
-Additional columns are ignored.
+Copy the v2.0 Python files and `hla_frequency_tables.xlsx` into this folder.
 
-## 12. Output Files
-
-The app writes:
-
-- One donor-specific output folder per conversion.
-- A copy of each `.hml` file into the configured HML folder.
-- By default, the HML folder is named `hml_files`.
-
-## 13. Optional: Build a macOS App
-
-Install PyInstaller:
+## Step 3 - Create a virtual environment
 
 ```bash
-python -m pip install pyinstaller
-```
-
-Build a one-file executable:
-
-```bash
-python -m PyInstaller --clean --onefile --windowed --name Donor_Typing_To_hml_full_gui_v3 Donor_Typing_To_hml_full_gui_v3.py
-```
-
-The result will be in:
-
-```text
-dist/
-```
-
-For a polished `.app` bundle, PyInstaller can also build app-style output, but signing/notarization may be needed for distribution outside your own machine.
-
-## 14. macOS Caveat: Browser Automation
-
-If the GUI opens but login/conversion cannot find Chrome or Edge, the script may need a small macOS browser path update.
-
-Typical browser paths are:
-
-```text
-/Applications/Google Chrome.app/Contents/MacOS/Google Chrome
-/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge
-```
-
-If necessary, update the script's browser detection function to include these paths.
-
-## 15. Troubleshooting
-
-### `No module named PySide6`
-
-Run:
-
-```bash
+python3 -m venv .venv
 source .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install PySide6
 ```
 
-### GUI Does Not Open
-
-Check Python and PySide6:
+## Step 4 - Start the app
 
 ```bash
-python --version
-python -c "import PySide6; print('PySide6 OK')"
+python Donor_Typing_To_hml_full_gui_v2_0.py
 ```
 
-### Login Is Not Detected
+## Step 5 - Log in
 
-Try:
+Open **Settings** in the app and choose **Login**. Complete Donordata login and 2FA in your browser.
 
-1. Close old Chrome/Edge windows opened by the app.
-2. Start the app again.
-3. Click `Settings` / `Login`.
-4. Complete login and keep the browser open.
+![Settings](docs_v2_assets/v2_settings.png)
 
-### Rows Turn Red
+## Step 6 - Convert donor typings
 
-Red rows indicate failure:
+1. Choose an output folder.
+2. Add anonymized example ET numbers such as `734219` only for testing documentation.
+3. Use **Run selected** or **Run all**.
+4. Review the generated HML files in `hml_files`.
 
-- Donordata session expired.
-- Donor record was inaccessible.
-- HLA Typing / CIWD genotype could not be read.
-- HML was not generated.
+## Notes for macOS Gatekeeper
 
-Log in again and rerun the donor.
+If you later package the app yourself, macOS may block unsigned apps. You may need local signing/notarization for wider distribution. For source-mode use, Gatekeeper normally does not block the Python script itself.
 
+## Troubleshooting
+
+### PySide6 install fails
+
+Update pip first:
+
+```bash
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install PySide6
+```
+
+### Browser does not open
+
+Open Donordata manually in Chrome or Edge, log in, and then start the app again.
+
+### Frequency table missing
+
+Make sure `hla_frequency_tables.xlsx` is in the same folder as the v2.0 script, or select it in Settings.
